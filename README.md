@@ -22,7 +22,7 @@ A powerful AI-driven Etsy shop SEO analysis and optimization skill for **Claude 
 
 ### Option A: Install as Claude Code Skill (Recommended)
 
-This registers slash commands (`/etsy-audit`, `/etsy-analyze`, etc.) globally so they work from any project.
+This registers slash commands (`/etsy-audit`, `/etsy-analyze`, etc.) **globally** so they work from any project in any Claude Code session.
 
 ```bash
 # 1. Clone the repository
@@ -42,11 +42,24 @@ npx tsx src/auth/server.ts
 
 That's it. Open any Claude Code session and use `/etsy-overview` to get started.
 
-**To uninstall:** `bash uninstall.sh`
+**What the installer does:**
+- Copies each skill's `SKILL.md` into `~/.claude/skills/etsy-*/` (Claude Code's global skill directory)
+- Rewrites all relative command paths to **absolute paths** so commands work from any project directory, not just from inside this repo
+- Installs npm dependencies automatically if `node_modules/` doesn't exist
+- Copies reference documentation alongside the main skill for deeper context
 
-### Option B: Project-Level Usage
+**After installation, these slash commands are available globally:**
+- `/etsy-overview` - Shop dashboard with scores and trends
+- `/etsy-audit` - Full SEO audit of all listings
+- `/etsy-analyze <listing_id>` - Deep analysis of a single listing
+- `/etsy-competitors <keywords>` - Marketplace competitor research
+- `/etsy-update <listing_id> --title "..." --tags "..."` - Update a listing
 
-If you prefer to work inside the project directory (skills are automatically available):
+**To uninstall:** `bash uninstall.sh` (removes all skills from `~/.claude/skills/`)
+
+### Option B: Project-Level Usage (No Global Install)
+
+If you prefer not to install globally, just work inside the project directory. Claude Code automatically discovers skills from `.claude/skills/` and `skills/` inside the current project:
 
 ```bash
 git clone https://github.com/abutun/etsy-seo-optimizer.git
@@ -57,15 +70,18 @@ cp .env.example .env
 npx tsx src/auth/server.ts
 ```
 
-Open this directory in Claude Code and the `/etsy-*` commands are available.
+Open this directory in Claude Code (`claude` from the terminal) and the `/etsy-*` commands are available. The skills only work when your working directory is this project.
 
-### Option C: Manual Skill Installation
+### Option C: Manual Skill Installation (Symlinks)
 
-For fine-grained control, symlink individual skills:
+For fine-grained control, symlink individual skills to the global directory:
 
 ```bash
 git clone https://github.com/abutun/etsy-seo-optimizer.git ~/etsy-seo-optimizer
 cd ~/etsy-seo-optimizer && npm install
+
+# Create the skills directory if it doesn't exist
+mkdir -p ~/.claude/skills
 
 # Symlink only the skills you want
 ln -s ~/etsy-seo-optimizer/skills/etsy-audit ~/.claude/skills/etsy-audit
@@ -75,7 +91,19 @@ ln -s ~/etsy-seo-optimizer/skills/etsy-update ~/.claude/skills/etsy-update
 ln -s ~/etsy-seo-optimizer/skills/etsy-overview ~/.claude/skills/etsy-overview
 ```
 
-> **Note:** With symlinks, you'll need to run commands from the project directory. The install script (Option A) handles path resolution automatically.
+> **Note:** With symlinks, the SKILL.md files contain relative paths (`npx tsx src/commands/...`), so commands only work when you run Claude Code from inside the project directory. The install script (Option A) rewrites these to absolute paths, which is why it's the recommended approach.
+
+### How Claude Code Discovers Skills
+
+Claude Code looks for skills in these locations (highest priority first):
+
+| Location | Scope | When to use |
+|----------|-------|-------------|
+| `~/.claude/skills/<name>/SKILL.md` | Global (all projects) | Option A or C above |
+| `.claude/skills/<name>/SKILL.md` | Project only | Option B above |
+| `skills/<name>/SKILL.md` | Project only | Option B above |
+
+Skills are detected live - no restart needed after installation. The skill's `description` field in the YAML frontmatter tells Claude when to use it, and `user-invocable: true` makes it available as a `/slash-command`.
 
 ### Etsy API Setup
 
