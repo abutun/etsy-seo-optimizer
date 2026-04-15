@@ -18,50 +18,87 @@ A powerful AI-driven Etsy shop SEO analysis and optimization skill for **Claude 
 - **Etsy Developer Account** - Create an app at [Etsy Developer Portal](https://www.etsy.com/developers/your-apps)
 - **Claude Code**, **Cursor**, **Codex**, or another AI coding assistant (optional - can also be used as a standalone CLI)
 
-## Quick Start
+## Installation
 
-### 1. Clone the Repository
+### Option A: Install as Claude Code Skill (Recommended)
+
+This registers slash commands (`/etsy-audit`, `/etsy-analyze`, etc.) globally so they work from any project.
+
+```bash
+# 1. Clone the repository
+git clone https://github.com/abutun/etsy-seo-optimizer.git
+cd etsy-seo-optimizer
+
+# 2. Run the installer (installs skills to ~/.claude/skills/)
+bash install.sh
+
+# 3. Configure your Etsy API credentials
+cp .env.example .env
+# Edit .env with your API key, shared secret, and shop ID
+
+# 4. Authenticate with Etsy (one-time OAuth flow)
+npx tsx src/auth/server.ts
+```
+
+That's it. Open any Claude Code session and use `/etsy-overview` to get started.
+
+**To uninstall:** `bash uninstall.sh`
+
+### Option B: Project-Level Usage
+
+If you prefer to work inside the project directory (skills are automatically available):
 
 ```bash
 git clone https://github.com/abutun/etsy-seo-optimizer.git
 cd etsy-seo-optimizer
-```
-
-### 2. Install Dependencies
-
-```bash
 npm install
+cp .env.example .env
+# Edit .env with your credentials
+npx tsx src/auth/server.ts
 ```
 
-### 3. Configure Environment
+Open this directory in Claude Code and the `/etsy-*` commands are available.
+
+### Option C: Manual Skill Installation
+
+For fine-grained control, symlink individual skills:
 
 ```bash
-cp .env.example .env
+git clone https://github.com/abutun/etsy-seo-optimizer.git ~/etsy-seo-optimizer
+cd ~/etsy-seo-optimizer && npm install
+
+# Symlink only the skills you want
+ln -s ~/etsy-seo-optimizer/skills/etsy-audit ~/.claude/skills/etsy-audit
+ln -s ~/etsy-seo-optimizer/skills/etsy-analyze ~/.claude/skills/etsy-analyze
+ln -s ~/etsy-seo-optimizer/skills/etsy-competitors ~/.claude/skills/etsy-competitors
+ln -s ~/etsy-seo-optimizer/skills/etsy-update ~/.claude/skills/etsy-update
+ln -s ~/etsy-seo-optimizer/skills/etsy-overview ~/.claude/skills/etsy-overview
 ```
 
-Edit `.env` with your Etsy API credentials:
+> **Note:** With symlinks, you'll need to run commands from the project directory. The install script (Option A) handles path resolution automatically.
+
+### Etsy API Setup
+
+1. Go to [developers.etsy.com/your-apps](https://www.etsy.com/developers/your-apps) and create a new app
+2. Set the **Callback URL** to `http://localhost:3737/oauth/callback`
+3. Copy the **Keystring** (`ETSY_API_KEY`) and **Shared Secret** (`ETSY_SHARED_SECRET`)
+4. Find your **Shop ID**: go to your shop page - the numeric ID is in the URL, or use your shop name
 
 ```env
-ETSY_API_KEY=your_etsy_api_key_here
-ETSY_SHARED_SECRET=your_etsy_shared_secret_here
-ETSY_SHOP_ID=your_shop_id_here
+ETSY_API_KEY=your_keystring_here
+ETSY_SHARED_SECRET=your_shared_secret_here
+ETSY_SHOP_ID=your_shop_id_or_name
 ```
 
-> **How to get your Shop ID**: Go to your Etsy shop page. The Shop ID is the numeric value in the URL, or you can use your shop name (e.g., "MyShopName").
+### Authentication
 
-### 4. Authenticate with Etsy
+Run the OAuth flow once (tokens auto-refresh for 90 days):
 
 ```bash
 npx tsx src/auth/server.ts
 ```
 
-This starts a local OAuth server and prints an authorization URL. Open the URL in your browser, log into Etsy, and authorize the app. Tokens are saved automatically to `data/tokens.json` (gitignored).
-
-### 5. Run Your First Overview
-
-```bash
-npx tsx src/commands/overview.ts
-```
+This starts a local server, prints an authorization URL, and waits for the callback. Open the URL in your browser, authorize the app, and tokens are saved to `data/tokens.json` (gitignored).
 
 ## Creating Your Etsy Developer App
 
