@@ -1,0 +1,25 @@
+{
+  "name": "etsy-seo-skill",
+  "version": "1.0.0",
+  "description": "Etsy SEO optimization skill for Claude Code and other AI tools",
+  "type": "module",
+  "scripts": {
+    "auth": "tsx src/auth/server.ts",
+    "audit": "tsx src/commands/audit.ts",
+    "analyze": "tsx src/commands/analyze.ts",
+    "competitors": "tsx src/commands/competitors.ts",
+    "update": "tsx src/commands/update.ts",
+    "overview": "tsx src/commands/overview.ts"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.7",
+    "tsx": "^4.19.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "^5.7.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
